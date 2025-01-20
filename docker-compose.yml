@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  kong-gw-db:
+    image: postgres:13
+    hostname: kong-gw-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: kong
+      POSTGRES_DB: kong
+    networks:
+      - kong-network
+    volumes:
+      - ./Gateway/data:/var/lib/postgresql/data
+
+  kong-gw:
+    image: kong/kong-gateway:3.9.0.0
+    hostname: kong-gw
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "8001:8001"
+      - "8444:8444"
+      - "8002:8002"
+      - "8445:8445"
+      - "8003:8003"
+      - "8004:8004"
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-gw-db
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_ADMIN_GUI_PATH: '/'
+      KONG_ADMIN_GUI_URL: 'http://localhost:8002/manager'
+    networks:
+     - kong-network
+    depends_on:
+      - kong-gw-db
+
+networks:
+  kong-network:
+    driver: bridge
+    name: kong-network
