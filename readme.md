@@ -4,6 +4,13 @@ TBD
 
 # Kong Gateway Setup
 
+Please create a 'data' folder inside ./Gateway
+```
+cd Gateway
+mkdir data
+```
+
+
 The first time you run the docker compose file, you will need to migrate database for Kong Gateway.
 
 ```

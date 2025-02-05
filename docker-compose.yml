@@ -3,7 +3,7 @@ version: '3'
 services:
   kong-gw-db:
     image: postgres:13
-    hostname: kong-gw-db
+    container_name: kong-gw-db
     ports:
       - "5432:5432"
     environment:
@@ -17,7 +17,7 @@ services:
 
   kong-gw:
     image: kong/kong-gateway:3.9.0.0
-    hostname: kong-gw
+    container_name: kong-gw
     ports:
       - "8000:8000"
       - "8443:8443"
@@ -43,6 +43,24 @@ services:
      - kong-network
     depends_on:
       - kong-gw-db
+
+  gbear:
+    container_name: gbear
+    build:
+      context: ./gbear
+      dockerfile: Dockerfile
+    volumes:
+      - ./gbear:/app # Mount local source code directory to the container
+      - ~/.m2:/root/.m2  # Mount the local .m2 repository to avoid re-downloading dependencies
+    ports:
+      - "8080:8080" # Expose port 8080
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev # Optional, use if you want to activate the 'dev' profile
+    command: ./mvnw spring-boot:run # Ensure Maven is used to run Spring Boot app
+    networks:
+     - kong-network
+    depends_on:
+      - kong-gw
 
 networks:
   kong-network:
